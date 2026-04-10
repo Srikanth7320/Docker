@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>User App</title>
+</head>
+<body>
+  <h2>User Data</h2>
+
+  <input type="text" id="name" placeholder="Name" />
+  <input type="number" id="age" placeholder="Age" />
+  <input type="text" id="city" placeholder="City" />
+  <button onclick="addUser()">Add</button>
+
+  <h2>Users List</h2>
+
+  <table border="1" cellpadding="10">
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>City</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+  </table>
+
+  <script>
+    const API_URL = "http://localhost:3000";
+
+    async function addUser() {
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const city = document.getElementById("city").value;
+
+      if (!name || !age || !city) {
+        alert("All fields required");
+        return;
+      }
+
+      await fetch(`${API_URL}/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, age, city })
+      });
+
+      document.getElementById("name").value = "";
+      document.getElementById("age").value = "";
+      document.getElementById("city").value = "";
+
+      loadUsers();
+    }
+
+    async function loadUsers() {
+      const res = await fetch(`${API_URL}/users`);
+      const users = await res.json();
+
+      const table = document.getElementById("userTable");
+      table.innerHTML = "";
+
+      users.forEach((user, index) => {
+        const row = `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${user.name}</td>
+            <td>${user.age}</td>
+            <td>${user.city}</td>
+            <td>
+              <button onclick="deleteUser(${user.id})">Delete</button>
+            </td>
+          </tr>
+        `;
+        table.innerHTML += row;
+      });
+    }
+
+    async function deleteUser(id) {
+      await fetch(`${API_URL}/users/${id}`, {
+        method: "DELETE"
+      });
+
+      loadUsers();
+    }
+
+    loadUsers();
+  </script>
+
+</body>
+</html>

@@ -1,15 +1,29 @@
-version: '1'
+name: simple-user-api-ui-app
+version: "3.8"
 
 services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    depends_on: 
-      - db
   db:
-    image: postgres
+    image: postgres:15
+    container_name: user-api-db-container
+    restart: always
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass
+      POSTGRES_DB: testdb
     ports:
       - "5432:5432"
+
+  app:
+    build: .
+    image: user-api-ui
+    container_name: user-api-ui-container
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: pass
+      DB_NAME: testdb
